@@ -1,4 +1,4 @@
-// Copyright 2013-2016 lessgo Author, All rights reserved.
+// Copyright 2014 Eryx <evorui аt gmаil dοt cοm>, All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,17 +17,17 @@ package main
 import (
 	"fmt"
 
-	"github.com/lessos/lessgo/data/iossdb"
-	"github.com/lessos/lessgo/types"
+	"code.hooto.com/lynkdb/ssdbgo"
 )
 
 func main() {
 
-	conn, err := iossdb.NewConnector(iossdb.Config{
+	conn, err := ssdbgo.NewConnector(ssdbgo.Config{
 		Host:    "127.0.0.1",
 		Port:    6380,
-		Timeout: 3,  // timeout in second, default to 10
-		MaxConn: 10, // max connection number, default to 1
+		Timeout: 3, // timeout in second, default to 10
+		MaxConn: 1, // max connection number, default to 1
+		// Auth:    "foobared",
 	})
 	if err != nil {
 		fmt.Println("Connect Error:", err)
@@ -47,40 +47,40 @@ func main() {
 		"cc", "val-cccccccccccccccccc",
 	})
 	// API::String() string
-	if rs := conn.Cmd("get", "aa"); rs.State == "ok" {
+	if rs := conn.Cmd("get", "aa"); rs.OK() {
 		fmt.Println("get OK\n\t", rs.String())
 	}
-	if rs := conn.Cmd("get", []byte("aa")); rs.State == "ok" {
+	if rs := conn.Cmd("get", []byte("aa")); rs.OK() {
 		fmt.Println("get bytes OK\n\t", rs.String())
 	}
 
 	// API::KvEach()
-	if rs := conn.Cmd("multi_get", "aa", "bb"); rs.State == "ok" {
+	if rs := conn.Cmd("multi_get", "aa", "bb"); rs.OK() {
 		fmt.Println("multi_get OK")
-		rs.KvEach(func(key, value types.Bytex) {
+		rs.KvEach(func(key, value ssdbgo.ResultBytes) {
 			fmt.Println("\t", key.String(), value.String())
 		})
 	}
 	// API::KvEach() bytes
 	bkeys := [][]byte{[]byte("aa"), []byte("bb")}
-	if rs := conn.Cmd("multi_get", bkeys); rs.State == "ok" {
+	if rs := conn.Cmd("multi_get", bkeys); rs.OK() {
 		fmt.Println("multi_get bytes OK")
-		rs.KvEach(func(key, value types.Bytex) {
+		rs.KvEach(func(key, value ssdbgo.ResultBytes) {
 			fmt.Println("\t", key, value)
 		})
 	}
 
-	if rs := conn.Cmd("scan", "aa", "cc", 10); rs.State == "ok" {
+	if rs := conn.Cmd("scan", "aa", "cc", 10); rs.OK() {
 		fmt.Println("scan OK")
-		n := rs.KvEach(func(key, value types.Bytex) {
+		n := rs.KvEach(func(key, value ssdbgo.ResultBytes) {
 			fmt.Println("\t", key.String(), value.String())
 		})
 		fmt.Println("\t got", n)
 	}
 
-	if rs := conn.Cmd("scan", []byte("aa"), []byte("cc"), 10); rs.State == "ok" {
+	if rs := conn.Cmd("scan", []byte("aa"), []byte("cc"), 10); rs.OK() {
 		fmt.Println("scan bytes OK")
-		n := rs.KvEach(func(key, value types.Bytex) {
+		n := rs.KvEach(func(key, value ssdbgo.ResultBytes) {
 			fmt.Println("\t", key.String(), value.String())
 		})
 		fmt.Println("\t got", n)
@@ -88,9 +88,9 @@ func main() {
 
 	conn.Cmd("zset", "z", "a", 3)
 	conn.Cmd("multi_zset", "z", "b", -2, "c", 5, "d", 3)
-	if rs := conn.Cmd("zrscan", "z", "", "", "", 10); rs.State == "ok" {
+	if rs := conn.Cmd("zrscan", "z", "", "", "", 10); rs.OK() {
 		fmt.Println("zrscan OK")
-		rs.KvEach(func(key, value types.Bytex) {
+		rs.KvEach(func(key, value ssdbgo.ResultBytes) {
 			fmt.Println("\t", key.String(), value.Int())
 		})
 	}
@@ -107,12 +107,12 @@ func main() {
 		fmt.Println("ttl OK\n\t", rs)
 	}
 
-	if rs := conn.Cmd("multi_hset", "zone", "c1", "v-01", "c2", "v-02"); rs.State == "ok" {
+	if rs := conn.Cmd("multi_hset", "zone", "c1", "v-01", "c2", "v-02"); rs.OK() {
 		fmt.Println("multi_hset OK")
 	}
-	if rs := conn.Cmd("multi_hget", "zone", "c1", "c2"); rs.State == "ok" {
+	if rs := conn.Cmd("multi_hget", "zone", "c1", "c2"); rs.OK() {
 		fmt.Println("multi_hget OK")
-		rs.KvEach(func(key, value types.Bytex) {
+		rs.KvEach(func(key, value ssdbgo.ResultBytes) {
 			fmt.Println("\t", key.String(), value.String())
 		})
 	}
@@ -126,16 +126,16 @@ func main() {
 	// API::List()
 	conn.Cmd("qpush", "queue", "q-1111111111111")
 	conn.Cmd("qpush", "queue", "q-2222222222222")
-	if rs := conn.Cmd("qpop", "queue", 10); rs.State == "ok" {
+	if rs := conn.Cmd("qpop", "queue", 10); rs.OK() {
 		fmt.Println("qpop list OK")
 		for i, value := range rs.List() {
 			fmt.Println("\t", i, value.String())
 		}
 	}
 
-	// iossdb.Reply.JsonDecode(obj interface{}) error
+	// ssdbgo.Result.JsonDecode(obj interface{}) error
 	conn.Cmd("set", "json_key", "{\"name\": \"test obj.name\", \"value\": \"test obj.value\"}")
-	if rs := conn.Cmd("get", "json_key"); rs.State == "ok" {
+	if rs := conn.Cmd("get", "json_key"); rs.OK() {
 		var rs_obj struct {
 			Name  string `json:"name"`
 			Value string `json:"value"`

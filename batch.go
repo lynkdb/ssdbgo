@@ -1,4 +1,4 @@
-// Copyright 2013-2016 lessgo Author, All rights reserved.
+// Copyright 2014 Eryx <evorui аt gmаil dοt cοm>, All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package iossdb
+package ssdbgo // import "code.hooto.com/lynkdb/ssdbgo"
 
 import (
 	"errors"
@@ -51,10 +51,10 @@ func (b *Batch) Cmd(args ...interface{}) {
 	b.cmds = append(b.cmds, args)
 }
 
-func (b *Batch) Exec() ([]*Reply, error) {
+func (b *Batch) Exec() ([]*Result, error) {
 
 	var (
-		rpls            = []*Reply{}
+		rpls            = []*Result{}
 		cmds            = []batch_cmds{}
 		cmds_size int64 = 0
 	)
@@ -119,33 +119,33 @@ func (b *Batch) Exec() ([]*Reply, error) {
 
 		for i := 0; i < bcmd.num; i++ {
 
-			r := &Reply{
-				State: ReplyError,
+			r := &Result{
+				Status: ResultError,
 			}
 
 			resp, err := cn.recv()
 
 			if err != nil {
 
-				r.State = err.Error()
+				r.Status = err.Error()
 
 			} else if len(resp) < 1 {
 
-				r.State = ReplyFail
+				r.Status = ResultFail
 
 			} else {
 
 				switch resp[0].String() {
-				case ReplyOK, ReplyNotFound, ReplyError, ReplyFail, ReplyClientError:
-					r.State = resp[0].String()
+				case ResultOK, ResultNotFound, ResultError, ResultFail, ResultClientError:
+					r.Status = resp[0].String()
 				}
 
-				if r.State == ReplyOK {
+				if r.Status == ResultOK {
 
 					for k, v := range resp {
 
 						if k > 0 {
-							r.Data = append(r.Data, v)
+							r.Items = append(r.Items, v)
 						}
 					}
 				}

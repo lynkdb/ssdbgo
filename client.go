@@ -1,4 +1,4 @@
-// Copyright 2013-2016 lessgo Author, All rights reserved.
+// Copyright 2014 Eryx <evorui аt gmаil dοt cοm>, All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package iossdb
+package ssdbgo // import "code.hooto.com/lynkdb/ssdbgo"
 
 import (
 	"bytes"
@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-
-	"github.com/lessos/lessgo/types"
 )
 
 type Client struct {
@@ -44,14 +42,14 @@ func Connect(ip string, port int) (*Client, error) {
 	return &Client{sock: sock}, nil
 }
 
-func (c *Client) Cmd(args ...interface{}) *Reply {
+func (c *Client) Cmd(args ...interface{}) *Result {
 
-	r := &Reply{
-		State: ReplyError,
+	r := &Result{
+		Status: ResultError,
 	}
 
 	if err := c.send(args); err != nil {
-		r.State = ReplyFail
+		r.Status = ResultFail
 		return r
 	}
 
@@ -61,12 +59,12 @@ func (c *Client) Cmd(args ...interface{}) *Reply {
 	}
 
 	switch resp[0].String() {
-	case ReplyOK, ReplyNotFound, ReplyError, ReplyFail, ReplyClientError:
-		r.State = resp[0].String()
+	case ResultOK, ResultNotFound, ResultError, ResultFail, ResultClientError:
+		r.Status = resp[0].String()
 	}
 
-	if r.State == ReplyOK && len(resp) > 1 {
-		r.Data = append(r.Data, resp[1:]...)
+	if r.Status == ResultOK && len(resp) > 1 {
+		r.Items = append(r.Items, resp[1:]...)
 	}
 
 	return r
@@ -183,7 +181,7 @@ func (c *Client) send(args []interface{}) error {
 	return err
 }
 
-func (c *Client) recv() ([]types.Bytex, error) {
+func (c *Client) recv() ([]ResultBytes, error) {
 
 	var buf [8192]byte
 
@@ -202,10 +200,10 @@ func (c *Client) recv() ([]types.Bytex, error) {
 	}
 }
 
-func (c *Client) parse() []types.Bytex {
+func (c *Client) parse() []ResultBytes {
 
 	var (
-		resp   = []types.Bytex{}
+		resp   = []ResultBytes{}
 		buf    = c.recv_buf.Bytes()
 		idx    = 0
 		offset = 0
@@ -238,11 +236,11 @@ func (c *Client) parse() []types.Bytex {
 			break
 		}
 
-		resp = append(resp, types.Bytex(bytesClone(buf[offset:offset+size])))
+		resp = append(resp, ResultBytes(bytesClone(buf[offset:offset+size])))
 		offset += size + 1
 	}
 
-	return []types.Bytex{}
+	return []ResultBytes{}
 }
 
 // Close The Client Connection

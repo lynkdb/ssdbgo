@@ -1,4 +1,4 @@
-// Copyright 2013-2016 lessgo Author, All rights reserved.
+// Copyright 2014 Eryx <evorui аt gmаil dοt cοm>, All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package iossdb
+package ssdbgo // import "code.hooto.com/lynkdb/ssdbgo"
 
 import (
 	"fmt"
@@ -93,18 +93,18 @@ func dialTimeout(network, addr string) (*Client, error) {
 	return &Client{sock: sock}, nil
 }
 
-func (cr *Connector) Cmd(args ...interface{}) *Reply {
+func (cr *Connector) Cmd(args ...interface{}) *Result {
 
 	cn, _ := cr.pull()
 
 	cn.sock.SetDeadline(time.Now().Add(cr.ctimeout))
 
-	var rpl *Reply
+	var rpl *Result
 
 	for try := 1; try <= 3; try++ {
 
 		rpl = cn.Cmd(args...)
-		if rpl.State != ReplyFail {
+		if rpl.Status != ResultFail {
 			break
 		}
 
