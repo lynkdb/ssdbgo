@@ -15,7 +15,7 @@ Some features include
 package main
 
 import (
-	"code.hooto.com/lynkdb/ssdbgo"
+	"github.com/lynkdb/ssdbgo"
 )
 
 func main() {

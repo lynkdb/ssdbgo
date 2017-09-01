@@ -17,7 +17,7 @@ package main
 import (
 	"fmt"
 
-	"code.hooto.com/lynkdb/ssdbgo"
+	"github.com/lynkdb/ssdbgo"
 )
 
 func main() {
