@@ -50,6 +50,7 @@ func (c *Client) Cmd(args ...interface{}) *Result {
 
 	if err := c.send(args); err != nil {
 		r.Status = ResultFail
+		r.Items = []ResultBytes{[]byte(err.Error())}
 		return r
 	}
 
