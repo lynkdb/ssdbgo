@@ -70,6 +70,15 @@ func main() {
 		})
 	}
 
+	// API::KvList()
+	if rs := conn.Cmd("scan", "a", "bbz", 10); rs.OK() {
+		fmt.Println("KvList OK")
+		rss := rs.KvList()
+		for _, v := range rss {
+			fmt.Println("\t", v.Key.String(), v.Value.String())
+		}
+	}
+
 	if rs := conn.Cmd("scan", "aa", "cc", 10); rs.OK() {
 		fmt.Println("scan OK")
 		n := rs.KvEach(func(key, value ssdbgo.ResultBytes) {

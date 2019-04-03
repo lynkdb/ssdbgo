@@ -123,9 +123,25 @@ func (r *Result) KvEach(fn func(key, value ResultBytes)) int {
 	return r.KvLen()
 }
 
+func (rs *Result) KvList() []*ResultEntry {
+	ls := []*ResultEntry{}
+	for i := 1; i < len(rs.Items); i += 2 {
+		ls = append(ls, &ResultEntry{
+			Key:   rs.Items[i-1],
+			Value: rs.Items[i],
+		})
+	}
+	return ls
+}
+
 // Json returns the map that marshals from the reply bytes as json in response .
 func (r *Result) JsonDecode(v interface{}) error {
 	return r.bytex().JsonDecode(v)
+}
+
+type ResultEntry struct {
+	Key   ResultBytes
+	Value ResultBytes
 }
 
 // Universal Bytes

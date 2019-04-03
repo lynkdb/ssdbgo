@@ -86,6 +86,7 @@ use the following method to get a dynamic data type what you want to need.
 * ssdbgo.Result.List() []ssdbgo.ResultBytes
 * ssdbgo.Result.KvEach(fn func(key, value ssdbgo.ResultBytes)) int
 * ssdbgo.Result.KvLen() int
+* ssdbgo.Result.KvList() []*ssdbgo.ResultEntry
 * ssdbgo.Result.JsonDecode(obj interface{}) error
 
 Examples:
