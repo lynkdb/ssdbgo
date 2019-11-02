@@ -47,6 +47,12 @@ func NewConnector(cfg Config) (*Connector, error) {
 		}
 	}
 
+	if cfg.CmdRetryNum < 1 {
+		cfg.CmdRetryNum = 1
+	} else if cfg.CmdRetryNum > 10 {
+		cfg.CmdRetryNum = 10
+	}
+
 	if cfg.Timeout < 3 {
 		cfg.Timeout = 3
 	} else if cfg.Timeout > 600 {
@@ -101,7 +107,7 @@ func (cr *Connector) Cmd(args ...interface{}) *Result {
 
 	var rpl *Result
 
-	for try := 1; try <= 3; try++ {
+	for try := 1; try <= cr.config.CmdRetryNum; try++ {
 
 		rpl = cn.Cmd(args...)
 		if rpl.Status != ResultFail {

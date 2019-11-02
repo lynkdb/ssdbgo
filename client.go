@@ -56,12 +56,23 @@ func (c *Client) Cmd(args ...interface{}) *Result {
 
 	resp, err := c.recv()
 	if err != nil || len(resp) < 1 {
+		r.Status = ResultFail
+		if err != nil {
+			r.Items = []ResultBytes{[]byte(err.Error())}
+		} else {
+			r.Items = []ResultBytes{[]byte("network error")}
+		}
 		return r
 	}
 
 	switch resp[0].String() {
+
 	case ResultOK, ResultNotFound, ResultError, ResultFail, ResultClientError:
 		r.Status = resp[0].String()
+
+	default:
+		r.Status = ResultFail
+		r.Items = []ResultBytes{}
 	}
 
 	if r.Status == ResultOK && len(resp) > 1 {

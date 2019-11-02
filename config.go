@@ -33,4 +33,7 @@ type Config struct {
 
 	// Maximum number of connections
 	MaxConn int `json:"maxconn"`
+
+	// Retry number of Cmd(), default: 1
+	CmdRetryNum int `json:"cmd_retry_num"`
 }
